@@ -1,0 +1,34 @@
+name: MFI + Williams %R Trading Signal Notifier
+
+on:
+  schedule:
+    # Run every 2 hours during market hours (9:30 AM - 4:00 PM ET, Monday-Friday)
+    - cron: '30 13,15,17,19 * * 1-5'
+  
+  # Allow manual trigger from GitHub UI
+  workflow_dispatch:
+
+jobs:
+  check-trading-signals:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install yfinance pandas numpy
+          
+      - name: Run trading signal detector
+        env:
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          RECIPIENT_EMAIL: ${{ secrets.RECIPIENT_EMAIL }}
+        run: python trading_signal_detector.py
